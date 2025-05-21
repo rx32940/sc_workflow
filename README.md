@@ -49,7 +49,7 @@ to submit a job to the st.jude cluster:
 bsub < bsub.sh
 ```
 
-```bash
+
 
 ### Optional Parameters
 
@@ -57,7 +57,7 @@ bsub < bsub.sh
 | -------------------- | ------------------------------------------------------------ | ------------------------------- |
 | `--genome_ref`       | Custom Cell Ranger reference path                            | Auto-selected based on species  |
 | `--gtf`              | GTF file (for Velocyto); auto-detected if not provided       | `${genome_ref}/genes/genes.gtf` |
-| `--species`          | `human` or `mouse`; used to auto-select genome reference | `human`                       |
+| `--species`          | `human` or `mouse`; used to auto-select genome reference     | `human`                       |
 | `--outdir`           | Output directory root                                        | `./results`                     |
 | `--selected_samples` | Optional comma-separated sample IDs to merge in final step   | all                             |
 
@@ -85,7 +85,7 @@ outdir/
 
 Use `-resume` to skip already completed steps:
 
-```bash
+```
 nextflow run main.nf -resume
 ```
 
