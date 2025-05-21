@@ -1,1 +1,91 @@
-# sc_workflow
+# 10X Single-Cell RNA Preprocessing Pipeline
+
+- **current implementation is only for Northcott lab to use on st.jude HPC cluster.**
+
+___
+
+This Nextflow pipeline automates pre-processing of 10X Genomics single-cell RNA-seq by running the following tools:
+
+* `Cell Ranger`: read alignment and quantification
+* `CellBender`: ambient RNA removal
+* `Velocyto`: spliced/unspliced quantification for RNA velocity
+* `DropletQC`: nuclear fraction and empty droplet detection
+
+**use `downstream/downstream_filtering.ipynb` to further filter the data.**
+
+
+## Pipeline Overview
+
+```
+samplesheet.csv → CellRanger → CellBender, Velocyto, DropletQC → Merge -> .h5ad
+```
+
+
+## Input Sample Sheet Format
+
+`samplesheet.csv` (comma-separated, header required):
+
+```csv
+id,fastq_dir
+3300000_dummy_scRNA,./data/3300000
+3300001_dummy_scRNA,./data/3300001
+```
+
+## Running the Pipeline
+
+```bash
+nextflow run main.nf \
+  --samplesheet ./data/samplesheet.csv \
+  --species human \
+  --outdir /path/to/output \
+  -resume
+```
+
+to submit a job to the st.jude cluster:
+
+- edit `bsub.sh` file in this repo
+
+```bash
+bsub < bsub.sh
+```
+
+```bash
+
+### Optional Parameters
+
+| Parameter            | Description                                                  | Default                         |
+| -------------------- | ------------------------------------------------------------ | ------------------------------- |
+| `--genome_ref`       | Custom Cell Ranger reference path                            | Auto-selected based on species  |
+| `--gtf`              | GTF file (for Velocyto); auto-detected if not provided       | `${genome_ref}/genes/genes.gtf` |
+| `--species`          | `human` or `mouse`; used to auto-select genome reference | `human`                       |
+| `--outdir`           | Output directory root                                        | `./results`                     |
+| `--selected_samples` | Optional comma-separated sample IDs to merge in final step   | all                             |
+
+---
+
+## Output Structure
+
+```
+outdir/
+├── cellranger/
+│   └── <sample_id>/
+├── cellbender/
+│   └── <sample_id>_cb/
+├── Velocyto/
+│   └── <sample_id>.loom
+├── DropletQC/
+│   └── <sample_id>/nf_ed_qc.csv
+└── writes/
+    └── merged_cts.h5ad
+```
+
+---
+
+## Resuming
+
+Use `-resume` to skip already completed steps:
+
+```bash
+nextflow run main.nf -resume
+```
+
