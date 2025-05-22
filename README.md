@@ -81,6 +81,13 @@ outdir/
 
 ---
 
+# Downstream filtering
+
+- Customized filtering threshold is recommanded based on metrics produced by **cellbender** and **DropletQC**
+- An example filtering workflow is available in [downstream/downstream_filtering.ipynb](https://github.com/rx32940/sc_workflow/blob/main/downstream/downstream_filtering.ipynb)
+
+---
+
 ## Resuming
 
 Use `-resume` to skip already completed steps:
