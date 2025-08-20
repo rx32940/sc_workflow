@@ -27,7 +27,7 @@ samplesheet.csv → CellRanger → CellBender, Velocyto, DropletQC → Merge -> 
 
 *IMPORTANT: 
 - data dir name **cannot** be same as <id>
-- <id> has to follow cellranger's default naming protocol: <id>_S<ANY_NUM>_L<lane_number>_R<read_number>_001.fastq.gz
+- <id> has to follow cellranger's default naming protocol: `<id>_S<ANY_NUM>_L<lane_number>_R<read_number>_001.fastq.gz`
 
 ```csv
 id,fastq_dir
