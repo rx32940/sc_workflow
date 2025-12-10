@@ -41,7 +41,7 @@ for (sample_dir in samples) {
     # Check if the directory contains at least R1 and R2 files
     r1_files <- list.files(sample_dir, pattern = "_R1_.*\\.fastq\\.gz$", full.names = TRUE)
     r2_files <- list.files(sample_dir, pattern = "_R2_.*\\.fastq\\.gz$", full.names = TRUE)
-    index_files <- list.files(sample_dir, pattern = "_I[12]_.*\\.fastq\\.gz$", full.names = TRUE)
+    index_files <- list.files(sample_dir, pattern = "_I[12]*\\.fastq\\.gz$", full.names = TRUE)
     
     # Make sure all required files are present
     if (length(r1_files) == 0 || length(r2_files) == 0) {
