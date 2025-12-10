@@ -20,6 +20,9 @@ This Nextflow pipeline automates pre-processing of 10X Genomics single-cell RNA-
 samplesheet.csv → CellRanger → CellBender, Velocyto, DropletQC → Merge -> .h5ad
 ```
 
+- will also take multiome and ATAC** file
+
+  _** mapping only_
 
 ## Input Sample Sheet Format
 
@@ -31,6 +34,14 @@ id,fastq_dir
 3300001_dummy_scRNA,./data/3300001
 ```
 
+* for multiome
+```csv
+fastqs,sample,library_type
+./data/3300000,3300000_dummy_scRNA,Gene Expression
+./data/3300000,3300000_dummy_scRNA,Chromatin Accessibility
+./data/3300001,3300001_dummy_scRNA,Gene Expression
+./data/3300001,3300001_dummy_scRNA,Chromatin Accessibility
+```
 ## Running the Pipeline
 
 ```bash
@@ -39,6 +50,22 @@ nextflow run main.nf \
   --species human \
   --outdir /path/to/output \
   -resume
+```
+
+* for multiome
+```bash
+nextflow run main.nf --modality arc \
+--species mouse \
+--samplesheet ./data/samplesheet.csv \
+--outdir /path/to/output
+```
+
+* for ATAC
+```bash
+nextflow run main.nf --modality atac \
+--species mouse \
+--samplesheet ./data/samplesheet.csv \
+--outdir /path/to/output
 ```
 
 to submit a job to the st.jude cluster:
