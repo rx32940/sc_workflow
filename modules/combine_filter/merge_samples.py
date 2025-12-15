@@ -26,7 +26,14 @@ def main():
 
     # Read sample IDs from samplesheet.csv
     samplesheet = pd.read_csv(samplesheet_file)
-    all_batches = set(samplesheet['id'].tolist())
+
+    # To handle both formats:
+    if 'id' in samplesheet.columns:
+        all_batches = set(samplesheet['id'].tolist())
+    elif 'sample' in samplesheet.columns:
+        all_batches = set(samplesheet['sample'].unique().tolist())
+    else:
+        raise ValueError("Samplesheet must contain either 'id' or 'sample' column")
 
     # Handle selected batches
     if selected_batches_file:

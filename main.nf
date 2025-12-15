@@ -59,35 +59,6 @@ workflow {
             }
             .set { ch_fastq }
 
-
-        // Set the GTF path
-        def gtf_file = params.gtf ? file(params.gtf).toString() :
-                        file("${genome_ref}/genes/genes.gtf").toString()
-
-        if (!file(gtf_file).exists()) {
-            error "GTF file not found at expected location: ${gtf_file}"
-        }
-
-        // Read the samplesheet
-        Channel
-            .fromPath(params.samplesheet)
-            .splitCsv(skip: 1, sep: ',', strip: true)
-            .map { id, fastq_dir_str ->
-                def fastq_dir = file(fastq_dir_str)
-
-                // Create metadata
-                def meta = [id: id, genome_ref: genome_ref, gtf: gtf_file]
-
-                // Check FASTQ presence
-                def fastqs = fastq_dir.listFiles()?.findAll { it.name.endsWith(".fastq.gz") } ?: []
-                if (fastqs.isEmpty()) {
-                    error "No FASTQ files found in directory: ${fastq_dir}"
-                }
-
-                return [meta, fastq_dir]
-            }
-            .set { ch_fastq }
-
       CELLRANGER_ATAC_COUNT(ch_fastq)
 
     } else {
@@ -126,6 +97,7 @@ workflow {
 
             CELLRANGER_ARC_COUNT(ch_libraries)
                 .set { ch_cellranger_out }
+                
 
         } else {
             // COUNT modality

@@ -1,7 +1,6 @@
 process CELLRANGER_ARC_COUNT {
     tag "$meta.id"
     label 'process_high'
-    publishDir "${params.outdir}/cellranger", mode: 'copy'
 
     module 'cellranger-arc/2.0.2'
 
@@ -16,16 +15,18 @@ process CELLRANGER_ARC_COUNT {
     def genome_ref = meta.genome_ref
 
     """
-    # Create libraries.csv
-cat > libraries.csv << 'EOF'
+    cat > libraries.csv << 'EOF'
 ${libraries_csv}
 EOF
 
     cellranger-arc count \
-    --id ${prefix} \
-    --reference ${genome_ref} \
-    --libraries libraries.csv \
-    --localcores ${task.cpus} \
-    --localmem ${task.memory.toGiga()}
+      --id ${prefix} \
+      --reference ${genome_ref} \
+      --libraries libraries.csv \
+      --localcores ${task.cpus} \
+      --localmem ${task.memory.toGiga()}
+
+    mkdir -p ${params.outdir}/cellranger-arc
+    cp -rL ${prefix} ${params.outdir}/cellranger-arc/
     """
 }

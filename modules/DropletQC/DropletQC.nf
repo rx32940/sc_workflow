@@ -14,8 +14,14 @@ process DROPLET_QC {
 
     script:
     """
+    # Copy arc BAM files to expected names
+    if [ -f ${cranger_out}/outs/gex_possorted_bam.bam ]; then
+        cp ${cranger_out}/outs/gex_possorted_bam.bam ${cranger_out}/outs/possorted_genome_bam.bam
+        cp ${cranger_out}/outs/gex_possorted_bam.bam.bai ${cranger_out}/outs/possorted_genome_bam.bam.bai
+    fi
+
     Rscript ${workflow.projectDir}/modules/DropletQC/DropletQC_function.R \
-        ${cranger_out}/outs \
-        ${task.cpus}
+    ${cranger_out}/outs \
+    ${task.cpus}
     """
 }
