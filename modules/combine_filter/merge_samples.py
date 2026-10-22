@@ -73,6 +73,7 @@ def main():
 
         # Load DropletQC data
         dropletQC_df = pd.read_csv(dropletqc_file, index_col=0)
+        dropletQC_df.index = dropletQC_df.index.astype(str)  # integer cell labels (Rhapsody) parse as ints
         cellbender_filtered.obs = cellbender_filtered.obs.merge(dropletQC_df, left_index=True, right_index=True, how="left")
 
         # Filter cells
@@ -80,6 +81,12 @@ def main():
 
         # Load RNA velocity data
         vadata = sc.read(velocity_file)
+
+        # velocyto names cells "<sample>:<barcode>x"; strip that when it makes the names match
+        # (needed for BD Rhapsody integer cell labels, which scvelo's own cleanup can't handle)
+        stripped_names = vadata.obs_names.str.split(":").str[-1].str.rstrip("x")
+        if len(cellbender_filtered.obs_names.intersection(stripped_names)) > 0:
+            vadata.obs_names = stripped_names
         cellbender_filtered = scv.utils.merge(cellbender_filtered, vadata)
 
         # Add batch information to cell names

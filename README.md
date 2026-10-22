@@ -96,6 +96,41 @@ bsub < bsub.sh
 | `--species`          | `human` or `mouse`; used to auto-select genome reference     | `human`                       |
 | `--outdir`           | Output directory root                                        | `./results`                     |
 | `--selected_samples` | Optional comma-separated sample IDs to merge in final step   | all                             |
+| `--min_umi`          | rhapsody only: UMI floor defining the filtered barcode set    | `500`                           |
+
+---
+
+## BD Rhapsody input
+
+For data already mapped by the BD Rhapsody pipeline (skips Cell Ranger):
+
+```csv
+id,rhapsody_dir
+3502749,/path/to/rhapsody/output/3502749
+```
+```bash
+nextflow run main.nf --modality rhapsody \
+--species human \
+--gtf /path/to/matching/genes.gtf \
+--min_umi 500 \
+--samplesheet ./data/samplesheet.csv \
+--outdir /path/to/output
+```
+`rhapsody_dir` must contain exactly one `*_Bioproduct.bam` and one `*_RSEC_MolsPerCell_Unfiltered_MEX.zip`.
+A conversion step (`modules/rhapsody/rhapsody_to_cellranger.py`) builds a Cell Ranger-like `outs/` folder:
+
+1. `raw_feature_bc_matrix.h5` from the unfiltered MEX zip
+2. `filtered_feature_bc_matrix.h5` = raw matrix restricted to barcodes with at least `--min_umi` UMIs (default 500)
+3. `possorted_genome_bam.bam` = the Rhapsody BAM with `UB` (from `MA`) and `RE` (exon/intron/intergenic, from `XF`) tags added
+
+CellBender (raw h5), DropletQC (BAM + filtered h5) and Velocyto (BAM + filtered barcodes) then run as usual.
+Cell IDs are the Rhapsody integer cell labels. Optional `raw_h5` / `filtered_h5` columns let you supply your own
+10x-style h5 files instead (barcodes must be the Rhapsody cell labels in the BAM `CB` tag):
+
+```csv
+id,rhapsody_dir,raw_h5,filtered_h5
+3502749,/path/to/rhapsody/output/3502749,/path/to/raw.h5,/path/to/filtered.h5
+```
 
 ---
 
