@@ -77,6 +77,20 @@ nextflow run main.nf --modality atac \
 --outdir /path/to/output
 ```
 
+* for existing Cell Ranger output (count or arc; skips mapping)
+```csv
+id,cellranger_dir
+sampleA,/path/to/cellranger/sampleA
+```
+`cellranger_dir` is the sample folder containing `outs/` (or the `outs/` folder itself); it needs
+`raw_feature_bc_matrix.h5`, `filtered_feature_bc_matrix.h5` and `filtered_feature_bc_matrix/`, and the BAM
+with its `.bai` (`possorted_genome_bam.bam` for count, `gex_possorted_bam.bam` for arc). Files are symlinked
+into the work directory, so the original run is never modified.
+```bash
+nextflow run main.nf --modality count --skip_cellranger \
+--samplesheet ./data/samplesheet.csv --outdir /path/to/output   # use --modality arc for multiome
+```
+
 to submit a job to the st.jude cluster:
 
 - edit `bsub.sh` file in this repo

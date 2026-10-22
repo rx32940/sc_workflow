@@ -20,6 +20,11 @@ WORK="/home/rxu28/software/sc_workflow"
 
 # Rscript $WORKFLOW/generate_samplesheet.R -d $DATADIR/$PROJECT -o $WORK/data/samplesheet.csv
 
+# Rscript generate_samplesheet_fromCR.R \
+# -d /path/to/cellranger_outputs \
+# -m count \ # -m arc for multiome
+# -o $WORK/data/samplesheet.csv 
+
 # source  ~/miniconda3/bin/deactivate
 
 # ######### 1) step 2: run workflow #########
