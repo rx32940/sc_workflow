@@ -15,7 +15,7 @@ process RHAPSODY_TO_CELLRANGER {
     // meta.filtered_h5 (optional) is a user-supplied filtered h5; otherwise filter by params.min_umi
     def filtered_arg = meta.filtered_h5 ? "--filtered ${meta.filtered_h5}" : "--min_umi ${params.min_umi}"
     """
-    python ${workflow.projectDir}/modules/rhapsody/rhapsody_to_cellranger.py \
+    /research/groups/northcgrp/home/common/Rachel/envs/velocyto/bin/python ${workflow.projectDir}/modules/rhapsody/rhapsody_to_cellranger.py \
         --bam ${bam} \
         --unfiltered ${unfiltered} \
         ${filtered_arg} \
