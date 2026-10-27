@@ -20,6 +20,16 @@ This Nextflow pipeline automates pre-processing of 10X Genomics single-cell RNA-
 samplesheet.csv → CellRanger → CellBender, Velocyto, DropletQC → Merge -> .h5ad
 ```
 
+The workflow can be started at three points (details in the sections below):
+
+| Starting point | Samplesheet | Flags |
+| --- | --- | --- |
+| FASTQs (Cell Ranger runs first) | `id,fastq_dir` (multiome: `fastqs,sample,library_type`) | `--modality rna\|arc\|atac` |
+| Existing Cell Ranger count / arc output | `id,cellranger_dir` (make it with `generate_samplesheet_fromCR.R`) | `--skip_cellranger --modality count\|arc` |
+| BD Rhapsody output | `id,rhapsody_dir` | `--modality rhapsody [--min_umi 500]` |
+
+Ready-to-copy `bsub` commands for each case are in [bsub_examples.sh](bsub_examples.sh).
+
 - will also take multiome and ATAC** file
 
   _** mapping only_
