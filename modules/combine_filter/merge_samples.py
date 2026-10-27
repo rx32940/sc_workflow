@@ -25,7 +25,7 @@ def main():
     selected_batches_file = args.selected_batches
 
     # Read sample IDs from samplesheet.csv
-    samplesheet = pd.read_csv(samplesheet_file)
+    samplesheet = pd.read_csv(samplesheet_file, dtype=str)  # keep numeric sample IDs as strings
 
     # To handle both formats:
     if 'id' in samplesheet.columns:
