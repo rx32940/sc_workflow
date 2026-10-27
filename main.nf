@@ -11,6 +11,7 @@ include { CAT_FASTQ }                    from './modules/cat/fastq'
 include { CELLRANGER_COUNT }             from './modules/cellranger/count'
 include { CELLRANGER_ARC_COUNT }        from './modules/cellranger/arc'
 include { CELLRANGER_ATAC_COUNT }        from './modules/cellranger/atac'
+include { STAGE_CELLRANGER }             from './modules/cellranger/stage'
 include { CELLBENDER_REMOVE_BACKGROUND } from './modules/cellbender/cellbender'
 include { VELOCYTO_RUN10X }              from './modules/velocyto/velocyto'
 include { DROPLET_QC }                   from './modules/DropletQC/DropletQC'
@@ -64,7 +65,42 @@ workflow {
     } else {
         // ARC or COUNT: run mapping + downstream analysis
         
-        if(params.modality == "arc") {
+        if(params.skip_cellranger) {
+            // Cell Ranger already run (count or arc): start from its output
+            // samplesheet: id,cellranger_dir  (sample directory containing outs/, or the outs directory)
+
+            def tag = params.modality == "arc" ? "arc" : "gex"
+            def human_ref = "/research/groups/northcgrp/projects/Northcott_Bioinformatics/northcgrp/References/Human/Ensembl/CellRanger/GRCh38/refdata-cellranger-arc-GRCh38-2024-A"
+            def mouse_ref = "/research/groups/northcgrp/projects/Northcott_Bioinformatics/northcgrp/References/Mouse/Ensembl/CellRanger/GRCm39/refdata-cellranger-arc-GRCm39-2024-A"
+            if (tag == "gex") {
+                human_ref = "/research/groups/northcgrp/projects/Northcott_Bioinformatics/northcgrp/References/Human/Ensembl/CellRanger/GRCh38/refdata-gex-GRCh38-2024-A"
+                mouse_ref = "/research/groups/northcgrp/projects/Northcott_Bioinformatics/northcgrp/References/Mouse/Ensembl/CellRanger/GRCm39/refdata-gex-GRCm39-2024-A"
+            }
+            def genome_ref = params.genome_ref ? file(params.genome_ref).toString() :
+                           (params.species == "mouse" ? mouse_ref : human_ref)
+            def gtf_file = params.gtf ? file(params.gtf).toString() :
+                            file("${genome_ref}/genes/genes.gtf").toString()
+            if (!file(gtf_file).exists()) {
+                error "GTF file not found: ${gtf_file}"
+            }
+
+            Channel
+                .fromPath(params.samplesheet)
+                .splitCsv(header: true, sep: ',', strip: true)
+                .map { row ->
+                    if (!file(row.cellranger_dir).isDirectory()) {
+                        error "cellranger_dir not found for ${row.id}: ${row.cellranger_dir}"
+                    }
+                    // staged layout always uses the count BAM name, so velocyto/DropletQC treat arc as count
+                    def meta = [id: row.id, genome_ref: genome_ref, gtf: gtf_file, modality: "count"]
+                    return [meta, file(row.cellranger_dir)]
+                }
+                .set { ch_existing_cr }
+
+            STAGE_CELLRANGER(ch_existing_cr)
+                .set { ch_cellranger_out }
+
+        } else if(params.modality == "arc") {
             
             def human_ref = "/research/groups/northcgrp/projects/Northcott_Bioinformatics/northcgrp/References/Human/Ensembl/CellRanger/GRCh38/refdata-cellranger-arc-GRCh38-2024-A"
             def mouse_ref = "/research/groups/northcgrp/projects/Northcott_Bioinformatics/northcgrp/References/Mouse/Ensembl/CellRanger/GRCm39/refdata-cellranger-arc-GRCm39-2024-A"

@@ -77,6 +77,24 @@ nextflow run main.nf --modality atac \
 --outdir /path/to/output
 ```
 
+* for existing Cell Ranger output (count or arc; skips mapping)
+```csv
+id,cellranger_dir
+sampleA,/path/to/cellranger/sampleA
+```
+`cellranger_dir` is the sample folder containing `outs/` (or the `outs/` folder itself); it needs
+`raw_feature_bc_matrix.h5`, `filtered_feature_bc_matrix.h5` and `filtered_feature_bc_matrix/`, and the BAM
+with its `.bai` (`possorted_genome_bam.bam` for count, `gex_possorted_bam.bam` for arc). Files are symlinked
+into the work directory, so the original run is never modified.
+
+Steps: `generate_samplesheet_fromCR.R` lists the sample folders that have everything the workflow needs (and warns about
+those that don't) -> `STAGE_CELLRANGER` links the files -> CellBender, Velocyto and DropletQC -> merge. There is no
+`cellranger/` folder in the output, because Cell Ranger is not re-run. See `bsub_examples.sh` for ready-to-copy commands.
+```bash
+nextflow run main.nf --modality count --skip_cellranger \
+--samplesheet ./data/samplesheet.csv --outdir /path/to/output   # use --modality arc for multiome
+```
+
 to submit a job to the st.jude cluster:
 
 - edit `bsub.sh` file in this repo
@@ -94,6 +112,8 @@ bsub < bsub.sh
 | `--genome_ref`       | Custom Cell Ranger reference path                            | Auto-selected based on species  |
 | `--gtf`              | GTF file (for Velocyto); auto-detected if not provided       | `${genome_ref}/genes/genes.gtf` |
 | `--species`          | `human` or `mouse`; used to auto-select genome reference     | `human`                       |
+| `--modality`         | `rna` (Cell Ranger count), `arc` (multiome) or `atac`        | `rna`                           |
+| `--skip_cellranger`  | start from existing Cell Ranger count/arc output (samplesheet `id,cellranger_dir`) | `false`    |
 | `--outdir`           | Output directory root                                        | `./results`                     |
 | `--selected_samples` | Optional comma-separated sample IDs to merge in final step   | all                             |
 
